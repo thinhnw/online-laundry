@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  devjobs:
+    image: devjobs
+    container_name: devjobs
+    build:
+      context: ./Devjobs/
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - VUE_APP_AUTH_SERVER_URL=http://localhost:5000
+      - VUE_APP_CLIENT_URL=http://localhost:8080
+      - VUE_APP_CLIENT_ID=vue.client
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      SA_PASSWORD: "Your_password123"
+      ACCEPT_EULA: "Y"
+
+
