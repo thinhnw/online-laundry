@@ -29,7 +29,7 @@ namespace Devjobs.Controllers
             this.configuration = config;
         }
 
-        [HttpPost("/register")]
+        [HttpPost("/api/register")]
         public async Task<IActionResult> Register(RegisterDto form)
         {
             if (!ModelState.IsValid)
@@ -59,7 +59,7 @@ namespace Devjobs.Controllers
             return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));
         }
 
-        [HttpPost("/login")]
+        [HttpPost("/api/login")]
         public async Task<IActionResult> Login(LoginDto userData)
         {
             if (!ModelState.IsValid)
