@@ -22,6 +22,5 @@ namespace Devjobs.Models
         public virtual Corporate Corporate { get; init; }
 
 
-
     }
 }

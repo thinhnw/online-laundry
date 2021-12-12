@@ -8,9 +8,7 @@ namespace Devjobs.Dtos
 {
     public class CorporateDto
     {
-        public int Id { get; init; }
         public string About { get; init; }
         public int UserId { get; init; }
-        public virtual User User { get; init; }
     }
 }
