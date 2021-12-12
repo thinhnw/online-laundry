@@ -14,8 +14,6 @@ namespace Devjobs.Dtos
 
         //FK
         public int CandidateId { get; init; }
-        public virtual Candidate Candidate { get; init; }
         public int JobId { get; init; }
-        public virtual Job Job { get; init; }
     }
 }
