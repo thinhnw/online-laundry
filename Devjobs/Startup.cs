@@ -34,7 +34,13 @@ namespace Devjobs
         public void ConfigureServices(IServiceCollection services)
         {            
             var connectionString = Configuration.GetConnectionString("DevjobsDB");
-            services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+
+            services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<ICandidatesRepository, CandidatesRepository>();
+            services.AddScoped<ICorporatesRepository, CorporatesRepository>();
+            services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository>();
+            services.AddScoped<IJobsRepository, JobsRepository>();
+
             services.AddDbContextPool<Models.DatabaseContext>(options =>
             {
                 options.UseSqlServer(connectionString);

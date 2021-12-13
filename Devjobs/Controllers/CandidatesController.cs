@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Devjobs.Models;
 using Devjobs.Repositories;
+using Devjobs.Dtos;
 
 namespace Devjobs.Controllers
 {
@@ -77,12 +78,12 @@ namespace Devjobs.Controllers
         // POST: api/Candidates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Candidate>> PostCandidate(Candidate candidateDto)
+        public async Task<ActionResult<Candidate>> PostCandidate(CandidateDto candidateDto)
         {
             Candidate candidate = new()
             {
                 Education = candidateDto.Education,
-                YearOfExperience = candidateDto.YearOfExperience,
+                YearsOfExperience = candidateDto.YearsOfExperience,
                 CV = candidateDto.CV,
                 UserId = candidateDto.UserId
             };

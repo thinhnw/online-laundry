@@ -23,7 +23,12 @@ namespace Devjobs.Repositories
         public async Task DeleteCandidateAsync(int id)
         {
             Candidate candidate = await context.Candidates.FindAsync(id);
-            context.Candidates.Remove(candidate);
+            if (candidate != null)
+            {
+                context.Candidates.Remove(candidate);
+                await SaveChangesAsync();
+            }            
+            
         }
         public async Task<Candidate> GetCandidateByIdAsync(int id)
         {
@@ -42,8 +47,7 @@ namespace Devjobs.Repositories
 
         public async Task UpdateCandidateAsync(Candidate candidate)
         {
-            var candidateInDb = await context.Candidates.FindAsync(candidate.Id);
-            candidateInDb = candidate;
+            context.Entry(candidate).State = EntityState.Modified;
             await SaveChangesAsync();
         }
     }

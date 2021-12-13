@@ -9,7 +9,7 @@ namespace Devjobs.Dtos
     public class CandidateDto
     {
         public string Education { get; init; }
-        public int YearOfExperience { get; init; }
+        public int YearsOfExperience { get; init; }
         public decimal CV { get; init; }
         public int UserId { get; init; }
     }
