@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Devjobs.Models;
 using Devjobs.Repositories;
+using Devjobs.Dtos;
 
 namespace Devjobs.Controllers
 {
@@ -14,24 +15,22 @@ namespace Devjobs.Controllers
     [ApiController]
     public class CandidatesController : ControllerBase
     {
-        private readonly DatabaseContext context;
         private readonly ICandidatesRepository repository;
-        public CandidatesController(ICandidatesRepository repository, DatabaseContext context)
+        public CandidatesController(ICandidatesRepository repository)
         {
-            this.context = context;
             this.repository = repository;
         }
 
         // GET: api/Candidates
         [HttpGet]
-        public async Task<IEnumerable<Candidate>> GetCandidates()
+        public async Task<IEnumerable<CandidateDto>> GetCandidates()
         {
-            return await repository.GetCandidatesAsync();
+            return (await repository.GetCandidatesAsync()).Select(item=>item.AsDto());
         }
 
         // GET: api/Candidates/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Candidate>> GetCandidate(int id)
+        public async Task<ActionResult<CandidateDto>> GetCandidate(int id)
         {
             var candidate = await repository.GetCandidateByIdAsync(id);
 
@@ -40,54 +39,49 @@ namespace Devjobs.Controllers
                 return NotFound();
             }
 
-            return candidate;
+            return candidate.AsDto();
         }
 
         // PUT: api/Candidates/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCandidate(int id, Candidate candidate)
+        public async Task<IActionResult> PutCandidate(int id, CandidateDto candidateDto)
         {
-            if (id != candidate.Id)
+            var candidateInDb = await repository.GetCandidateByIdAsync(id);
+            if (candidateInDb is null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            context.Entry(candidate).State = EntityState.Modified;
-
-            try
+            Candidate candidate = candidateInDb with
             {
-                await repository.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CandidateExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+                UserId = candidateDto.UserId,
+                City = candidateDto.City,
+                Country = candidateDto.Country,
+                Address = candidateDto.Address,
+                FirstName = candidateDto.FirstName,
+                LastName = candidateDto.LastName,
+                Phone = candidateDto.Phone,
+            };
+            await repository.UpdateCandidateAsync(candidate);
             return NoContent();
         }
 
         // POST: api/Candidates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Candidate>> PostCandidate(Candidate candidateDto)
+        public async Task<ActionResult<Candidate>> PostCandidate(CandidateDto candidateDto)
         {
             Candidate candidate = new()
             {
-                Education = candidateDto.Education,
-                YearOfExperience = candidateDto.YearOfExperience,
-                CV = candidateDto.CV,
-                UserId = candidateDto.UserId
+                UserId = candidateDto.UserId,
+                City = candidateDto.City,
+                Country = candidateDto.Country,
+                Address = candidateDto.Address,
+                FirstName = candidateDto.FirstName,
+                LastName = candidateDto.LastName,
+                Phone = candidateDto.Phone,
             };
             await repository.AddCandidateAsync(candidate);
-            await repository.SaveChangesAsync();
 
             return CreatedAtAction("GetCandidate", new { id = candidate.Id }, candidate);
         }
@@ -96,20 +90,15 @@ namespace Devjobs.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCandidate(int id)
         {
-            var candidate = await context.Candidates.FindAsync(id);
+            var candidate = await repository.GetCandidateByIdAsync(id);
             if (candidate == null)
             {
                 return NotFound();
             }
 
             await repository.DeleteCandidateAsync(id);
-            await context.SaveChangesAsync();
             return NoContent();
         }
 
-        private bool CandidateExists(int id)
-        {
-            return context.Candidates.Any(e => e.Id == id);
-        }
     }
 }

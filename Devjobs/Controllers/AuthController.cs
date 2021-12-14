@@ -29,7 +29,7 @@ namespace Devjobs.Controllers
             this.configuration = config;
         }
 
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto form)
         {
             if (!ModelState.IsValid)
@@ -44,13 +44,9 @@ namespace Devjobs.Controllers
             }
             var user = new User
             {
-                Email = form.Email,
-                Username = form.Email,
-                Phone = form.Phone,
-                FirstName = form.FirstName,
-                LastName = form.LastName,
+                Email = form.Email,         
                 Password = GetMD5(form.Password),
-                Role = "User"
+                Role = form.Role
             };
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
@@ -59,7 +55,7 @@ namespace Devjobs.Controllers
             return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));
         }
 
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto userData)
         {
             if (!ModelState.IsValid)
@@ -84,9 +80,7 @@ namespace Devjobs.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.ToString()),
-                new Claim("Id",user.Id.ToString()),
-                new Claim("FirstName", user.FirstName),
-                new Claim("LastName", user.LastName),
+                new Claim("Id",user.Id.ToString()),                
                 new Claim("Email",user.Email),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
@@ -97,7 +91,7 @@ namespace Devjobs.Controllers
 
             return token;
         }
-        private string GetMD5(string str)
+        private static string GetMD5(string str)
         {
             MD5 md5 = new MD5CryptoServiceProvider();
             byte[] frData = Encoding.UTF8.GetBytes(str);

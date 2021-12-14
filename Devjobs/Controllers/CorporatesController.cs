@@ -15,103 +15,82 @@ namespace Devjobs.Controllers
     [ApiController]
     public class CorporatesController : ControllerBase
     {
-        private readonly DatabaseContext context;
         private readonly ICorporatesRepository repository;
 
-        public CorporatesController(ICorporatesRepository repository, DatabaseContext context)
-        {
-            this.context = context;
+        public CorporatesController(ICorporatesRepository repository)
+        {            
             this.repository = repository;
         }
 
 
         // GET: api/Corporates
         [HttpGet]
-        public async Task<IEnumerable<Corporate>> GetCorporates()
+        public async Task<IEnumerable<CorporateDto>> GetCorporates()
         {
-            return await repository.GetCorporatesAsync();
+            return (await repository.GetCorporatesAsync()).Select(corporate => corporate.AsDto());
         }
 
         // GET: api/Corporates/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Corporate>> GetCorporate(int id)
+        public async Task<ActionResult<CorporateDto>> GetCorporateAsync(int id)
         {
             var corporate = await repository.GetCorporateByIdAsync(id);
 
-            if (corporate == null)
+            if (corporate is null)
             {
                 return NotFound();
             }
 
-            return corporate;
-        }
-
-        // PUT: api/Corporates/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCorporate(int id, Corporate corporate)
-        {
-            if (id != corporate.Id)
-            {
-                return BadRequest();
-            }
-
-            context.Entry(corporate).State = EntityState.Modified;
-
-            try
-            {
-                await repository.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CorporateExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return corporate.AsDto();
         }
 
         // POST: api/Corporates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Corporate>> PostCorporate(CorporateDto corporateDto)
+        public async Task<ActionResult<Corporate>> PostCorporate(CreateCorporateDto dto)
         {
+
             Corporate corporate = new()
             {
-                About = corporateDto.About,
-                UserId = corporateDto.UserId
+                Name = dto.Name,
+                About = dto.About,
+                UserId = dto.UserId
             };
-            await repository.AddCorporateAsync(corporate);
-            await repository.SaveChangesAsync();
-
-            return CreatedAtAction("GetCorporate", new { id = corporate.Id }, corporate);
+            var result = await repository.AddCorporateAsync(corporate);
+            if (result is null)
+            {
+                return NotFound("User not found");
+            }
+            
+            return CreatedAtAction("GetCorporateAsync", new { id = corporate.Id }, corporate);
         }
 
-        // DELETE: api/Corporates/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCorporate(int id)
+
+        // PUT: api/Corporates/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCorporate(int id, UpdateCorporateDto dto)
         {
-            var corporate = await context.Corporates.FindAsync(id);
-            if (corporate == null)
+            var inDb = await repository.GetCorporateByIdAsync(id);
+            if (inDb is null)
             {
                 return NotFound();
             }
-
-            await repository.DeleteCorporateAsync(id);
-            await repository.SaveChangesAsync();
+            inDb.About = dto.About;
+            inDb.Name = dto.Name;
+            await repository.SaveChangesAsync();            
 
             return NoContent();
         }
 
-        private bool CorporateExists(int id)
-        {
-            return context.Corporates.Any(e => e.Id == id);
-        }
+       
+        // DELETE: api/Corporates/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCorporate(int id)
+        {            
+            await repository.DeleteCorporateAsync(id);         
+
+            return NoContent();
+        }   
     }
 }

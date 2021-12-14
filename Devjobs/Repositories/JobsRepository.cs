@@ -15,15 +15,23 @@ namespace Devjobs.Repositories
         {
             this.context = context;
         }
-        public async Task AddJobAsync(Job job)
+        public async Task<Job>AddJobAsync(Job job)
         {
+            var corporate = await context.Corporates.FindAsync(job.CorporateId);
+            if (corporate is null) return null;
             await context.Jobs.AddAsync(job);
+            await SaveChangesAsync();
+            return job;
         }
 
         public async Task DeleteJobAsync(int id)
         {
             Job job = await context.Jobs.FindAsync(id);
-            context.Jobs.Remove(job);
+            if (job != null)
+            {
+                context.Jobs.Remove(job);
+                await SaveChangesAsync();
+            }
         }
 
         public async Task<Job> GetJobByIdAsync(int id)
@@ -43,8 +51,7 @@ namespace Devjobs.Repositories
 
         public async Task UpdateJobAsync(Job job)
         {
-            var jobInDb = await context.Jobs.FindAsync(job.Id);
-            jobInDb = job;
+            context.Entry(job).State = EntityState.Modified;
             await SaveChangesAsync();
         }
     }

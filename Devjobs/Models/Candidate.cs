@@ -10,9 +10,12 @@ namespace Devjobs.Models
     public record Candidate
     {
         public int Id { get; init; }
-        public string Education { get; init; }
-        public int YearOfExperience { get; init; }
-        public decimal CV { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public string Address { get; init; }
+        public string City { get; init; }
+        public string Country { get; init; }
+        public string Phone { get; init; }
         public int UserId { get; init; }
         public virtual User User { get; init; }
 

@@ -10,7 +10,7 @@ namespace Devjobs.Repositories
     {
         Task<IEnumerable<Corporate>> GetCorporatesAsync();
         Task<Corporate> GetCorporateByIdAsync(int id);
-        Task AddCorporateAsync(Corporate corporate);
+        Task<Corporate> AddCorporateAsync(Corporate corporate);
         Task DeleteCorporateAsync(int id);
         Task UpdateCorporateAsync(Corporate corporate);
         Task SaveChangesAsync();
