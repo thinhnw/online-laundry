@@ -17,7 +17,7 @@ namespace Devjobs.Repositories
         }
         public async Task<Corporate> AddCorporateAsync(Corporate corporate)
         {
-           var user = await context.Users.FindAsync(corporate.UserId);
+            var user = await context.Users.FindAsync(corporate.UserId);
             if (user is null) return null;
             await context.Corporates.AddAsync(corporate);
             await SaveChangesAsync();

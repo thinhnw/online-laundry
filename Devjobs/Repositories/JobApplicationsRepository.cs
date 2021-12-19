@@ -15,15 +15,25 @@ namespace Devjobs.Repositories
         {
             this.context = context;
         }
-        public async Task AddJobApplicationAsync(JobApplication jobApplication)
+        public async Task<JobApplication> AddJobApplicationAsync(JobApplication jobApplication)
         {
+            Job job = await context.Jobs.FindAsync(jobApplication.JobId);
+            Candidate candidate = await context.Candidates.FindAsync(jobApplication.CandidateId);
+            if (job is null || candidate is null) return null;
             await context.JobApplications.AddAsync(jobApplication);
+            await SaveChangesAsync();
+            return jobApplication;
         }
 
         public async Task DeleteJobApplicationAsync(int id)
         {
             JobApplication jobApplication = await context.JobApplications.FindAsync(id);
-            context.JobApplications.Remove(jobApplication);
+            if (jobApplication != null)
+            {
+                context.JobApplications.Remove(jobApplication);
+                await SaveChangesAsync();
+
+            };
         }
 
         public async Task<JobApplication> GetJobApplicationByIdAsync(int id)
@@ -43,8 +53,7 @@ namespace Devjobs.Repositories
 
         public async Task UpdateJobApplicationAsync(JobApplication jobApplication)
         {
-            var jobInDb = await context.JobApplications.FindAsync(jobApplication.Id);
-            jobInDb = jobApplication;
+            context.Entry(jobApplication).State = EntityState.Modified;
             await SaveChangesAsync();
         }
     }

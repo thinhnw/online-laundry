@@ -15,25 +15,23 @@ namespace Devjobs.Controllers
     [ApiController]
     public class JobsController : ControllerBase
     {
-        private readonly DatabaseContext context;
         private readonly IJobsRepository repository;
 
-        public JobsController(IJobsRepository repository, DatabaseContext context)
+        public JobsController(IJobsRepository repository)
         {
-            this.context = context;
             this.repository = repository;
         }
 
         // GET: api/Jobs
         [HttpGet]
-        public async Task<IEnumerable<Job>> GetJobs()
+        public async Task<IEnumerable<JobDto>> GetJobs()
         {
-            return await repository.GetJobsAsync();
+            return (await repository.GetJobsAsync()).Select(item=>item.AsDto());
         }
 
         // GET: api/Jobs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Job>> GetJob(int id)
+        public async Task<ActionResult<JobDto>> GetJob(int id)
         {
             var job = await repository.GetJobByIdAsync(id);
 
@@ -42,37 +40,30 @@ namespace Devjobs.Controllers
                 return NotFound();
             }
 
-            return job;
+            return job.AsDto();
         }
 
         // PUT: api/Jobs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutJob(int id, Job job)
+        public async Task<IActionResult> PutJob(int id, JobDto jobDto)
         {
-            if (id != job.Id)
+            var jobInDb = await repository.GetJobByIdAsync(id);
+            if (jobInDb is null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            context.Entry(job).State = EntityState.Modified;
-
-            try
+            Job job = jobInDb with
             {
-                await repository.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!JobExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+                CorporateId = jobDto.CorporateId,
+                Description = jobDto.Description,
+                Location = jobDto.Location,
+                SalaryMax = jobDto.SalaryMax,
+                SalaryMin = jobDto.SalaryMin,
+                Status = jobDto.Status,
+                Title = jobDto.Title,
+            };
+            await repository.UpdateJobAsync(job);
             return NoContent();
         }
 
@@ -92,8 +83,6 @@ namespace Devjobs.Controllers
                 CorporateId = jobDto.CorporateId,
             };
             await repository.AddJobAsync(job);
-            await repository.SaveChangesAsync();
-
             return CreatedAtAction("GetJob", new { id = job.Id }, job);
         }
 
@@ -101,21 +90,15 @@ namespace Devjobs.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJob(int id)
         {
-            var job = await context.Jobs.FindAsync(id);
+            var job = await repository.GetJobByIdAsync(id);
             if (job == null)
             {
                 return NotFound();
             }
 
             await repository.DeleteJobAsync(id);
-            await repository.SaveChangesAsync();
-
             return NoContent();
         }
-
-        private bool JobExists(int id)
-        {
-            return context.Jobs.Any(e => e.Id == id);
-        }
     }
+
 }

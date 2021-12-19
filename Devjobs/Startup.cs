@@ -40,6 +40,8 @@ namespace Devjobs
             services.AddScoped<ICorporatesRepository, CorporatesRepository>();
             services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
+            services.AddScoped<IEducationsRepository, EducationsRepository>();
+            services.AddScoped<IWorkExperiencesRepository, WorkExperiencesRepository>();
 
             services.AddDbContextPool<Models.DatabaseContext>(options =>
             {
@@ -88,9 +90,6 @@ namespace Devjobs
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors(MyAllowOrigins);
-
 
             app.UseAuthorization();
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Devjobs.Dtos;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,7 +21,5 @@ namespace Devjobs.Models
         //FK
         public int CorporateId { get; init; }
         public virtual Corporate Corporate { get; init; }
-
-
     }
 }

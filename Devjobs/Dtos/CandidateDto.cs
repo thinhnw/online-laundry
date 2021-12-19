@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace Devjobs.Dtos
 {
-    public class CandidateDto
+    public record CandidateDto
     {
-        public string Education { get; init; }
-        public int YearsOfExperience { get; init; }
-        public decimal CV { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public string Address { get; init; }
+        public string City { get; init; }
+        public string Country { get; init; }
+        public string Phone { get; init; }
         public int UserId { get; init; }
     }
 }

@@ -10,7 +10,7 @@ namespace Devjobs.Repositories
     {
         Task<IEnumerable<Candidate>> GetCandidatesAsync();
         Task<Candidate> GetCandidateByIdAsync(int id);
-        Task AddCandidateAsync(Candidate candidate);
+        Task<Candidate> AddCandidateAsync(Candidate candidate);
         Task DeleteCandidateAsync(int id);
         Task UpdateCandidateAsync(Candidate candidate);
         Task SaveChangesAsync();

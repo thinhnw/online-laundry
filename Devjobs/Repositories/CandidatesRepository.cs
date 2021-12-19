@@ -15,9 +15,13 @@ namespace Devjobs.Repositories
         {
             this.context = context;
         }
-        public async Task AddCandidateAsync(Candidate candidate)
+        public async Task<Candidate> AddCandidateAsync(Candidate candidate)
         {
+            var user = await context.Users.FindAsync(candidate.UserId);
+            if (user is null) return null;
             await context.Candidates.AddAsync(candidate);
+            await SaveChangesAsync();
+            return candidate;
         }
 
         public async Task DeleteCandidateAsync(int id)
@@ -27,8 +31,8 @@ namespace Devjobs.Repositories
             {
                 context.Candidates.Remove(candidate);
                 await SaveChangesAsync();
-            }            
-            
+            }
+
         }
         public async Task<Candidate> GetCandidateByIdAsync(int id)
         {

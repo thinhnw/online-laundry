@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Devjobs.Models;
 using Devjobs.Repositories;
+using Devjobs.Dtos;
 
 namespace Devjobs.Controllers
 {
@@ -14,24 +15,22 @@ namespace Devjobs.Controllers
     [ApiController]
     public class JobApplicationsController : ControllerBase
     {
-        private readonly DatabaseContext context;
         private readonly IJobApplicationsRepository repository;
 
-        public JobApplicationsController(IJobApplicationsRepository repository, DatabaseContext context)
+        public JobApplicationsController(IJobApplicationsRepository repository)
         {
-            this.context = context;
             this.repository = repository;
         }
         // GET: api/JobApplications
         [HttpGet]
-        public async Task<IEnumerable<JobApplication>> GetJobApplications()
+        public async Task<IEnumerable<JobApplicationDto>> GetJobApplications()
         {
-            return await repository.GetJobApplicationsAsync();
+            return (await repository.GetJobApplicationsAsync()).Select(item=>item.AsDto());
         }
 
         // GET: api/JobApplications/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobApplication>> GetJobApplication(int id)
+        public async Task<ActionResult<JobApplicationDto>> GetJobApplication(int id)
         {
             var jobApplication = await repository.GetJobApplicationByIdAsync(id);
 
@@ -40,44 +39,34 @@ namespace Devjobs.Controllers
                 return NotFound();
             }
 
-            return jobApplication;
+            return jobApplication.AsDto();
         }
 
         // PUT: api/JobApplications/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutJobApplication(int id, JobApplication jobApplication)
+        public async Task<IActionResult> PutJobApplication(int id, JobApplicationDto jobApplicationDto)
         {
-            if (id != jobApplication.Id)
+            var inDb = await repository.GetJobApplicationByIdAsync(id);
+            if (inDb is null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            context.Entry(jobApplication).State = EntityState.Modified;
-
-            try
+            JobApplication jobApplication = inDb with
             {
-                await repository.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!JobApplicationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+                CV=jobApplicationDto.CV,
+                Status=jobApplicationDto.Status,
+                CandidateId = jobApplicationDto.CandidateId,
+                JobId = jobApplicationDto.JobId
+            };
+            await repository.UpdateJobApplicationAsync(jobApplication);
             return NoContent();
         }
 
         // POST: api/JobApplications
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<JobApplication>> PostJobApplication(JobApplication jobApplicationDto)
+        public async Task<ActionResult<JobApplication>> PostJobApplication(JobApplicationDto jobApplicationDto)
         {
             JobApplication jobApplication = new()
             {
@@ -85,11 +74,8 @@ namespace Devjobs.Controllers
                 CV = jobApplicationDto.CV,
                 CandidateId = jobApplicationDto.CandidateId,
                 JobId = jobApplicationDto.JobId
-
             };
             await repository.AddJobApplicationAsync(jobApplication);
-            await repository.SaveChangesAsync();
-
             return CreatedAtAction("GetJobApplication", new { id = jobApplication.Id }, jobApplication);
         }
 
@@ -97,22 +83,17 @@ namespace Devjobs.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobApplication(int id)
         {
-            var jobApplication = await context.JobApplications.FindAsync(id);
+            var jobApplication = await repository.GetJobApplicationByIdAsync(id);
             if (jobApplication == null)
             {
                 return NotFound();
             }
 
             await repository.DeleteJobApplicationAsync(id);
-            await context.SaveChangesAsync();
-
             return NoContent();
         }
 
-        private bool JobApplicationExists(int id)
-        {
-            return context.JobApplications.Any(e => e.Id == id);
-        }
+       
     }
 }
  

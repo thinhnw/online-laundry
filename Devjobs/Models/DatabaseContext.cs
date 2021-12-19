@@ -20,6 +20,8 @@ namespace Devjobs.Models
         public virtual DbSet<JobApplication> JobApplications { get; set; }
         public virtual DbSet<Candidate> Candidates { get; set; }
         public virtual DbSet<Corporate> Corporates { get; set; }
+        public virtual DbSet<Education> Educations { get; set; }
+        public virtual DbSet<WorkExperience> WorkExperiences { get; set; }
         
     }
 }
