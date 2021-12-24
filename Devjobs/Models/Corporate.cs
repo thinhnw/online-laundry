@@ -13,6 +13,7 @@ namespace Devjobs.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string About { get; set; }
+        public string Logo { get; set; }
         public int UserId { get; set; }
         public virtual User User { get; set; }
     }

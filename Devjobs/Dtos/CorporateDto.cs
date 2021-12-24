@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Devjobs.Dtos
 {
-    public record CorporateDto(int Id, string Name, string About, int UserId);
-    public record CreateCorporateDto(string Name, string About, int UserId);
-    public record UpdateCorporateDto(string Name, string About);
+    public record CorporateDto(int Id, string Name, string About, string Logo, int UserId);
+    public record CreateCorporateDto(string Name, string About, string Logo, int UserId);
+    public record UpdateCorporateDto(string Name, string About, string Logo);
 }
