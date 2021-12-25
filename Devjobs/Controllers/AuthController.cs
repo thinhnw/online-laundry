@@ -18,7 +18,7 @@ namespace Devjobs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly DatabaseContext context;
         public IConfiguration configuration;
@@ -46,7 +46,7 @@ namespace Devjobs.Controllers
             {
                 Email = form.Email,         
                 Password = GetMD5(form.Password),
-                Role = form.Role
+                Role = form.IsCorporate ? "corporate" : "candidate"
             };
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
@@ -73,6 +73,12 @@ namespace Devjobs.Controllers
             return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));            
         }
 
+        [HttpPost("me")]
+        public async Task<ActionResult<dynamic>> GetMe()
+        {
+            
+        }
+
 
         private JwtSecurityToken CreateAccessToken(User user)
         {
@@ -82,6 +88,7 @@ namespace Devjobs.Controllers
                 new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.ToString()),
                 new Claim("Id",user.Id.ToString()),                
                 new Claim("Email",user.Email),
+                new Claim("Role",user.Role),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
 

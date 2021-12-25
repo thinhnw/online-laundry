@@ -39,6 +39,11 @@ namespace Devjobs.Repositories
             return await context.Candidates.FindAsync(id);
         }
 
+        public async Task<Candidate> GetCandidateByUserIddAsync(int userId)
+        {            
+            return await context.Candidates.FirstOrDefaultAsync(candidate => candidate.UserId == userId);
+        }
+
         public async Task<IEnumerable<Candidate>> GetCandidatesAsync()
         {
             return await context.Candidates.ToListAsync();

@@ -18,6 +18,6 @@ namespace Devjobs.Dtos
         public string Password { get; set; }
 
         [Required]
-        public string Role { get; set; }
+        public bool IsCorporate { get; set; }
     }
 }

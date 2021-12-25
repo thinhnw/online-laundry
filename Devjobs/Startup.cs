@@ -91,6 +91,8 @@ namespace Devjobs
 
             app.UseRouting();
 
+            app.UseCors(MyAllowOrigins);
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
