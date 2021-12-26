@@ -13,20 +13,21 @@ using Devjobs.Dtos;
 using System.Text;
 using System.Security.Cryptography;
 using System.Security.Claims;
+using Devjobs.Repositories;
 
 namespace Devjobs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : BaseController
-    {
-        private readonly DatabaseContext context;
+    {        
         public IConfiguration configuration;
+        public IUsersRepository users;
 
-        public AuthController(IConfiguration config, DatabaseContext context)
-        {
-            this.context = context;
+        public AuthController(IConfiguration config, IUsersRepository repo)
+        {            
             this.configuration = config;
+            this.users = repo;
         }
 
         [HttpPost("register")]
@@ -37,7 +38,7 @@ namespace Devjobs.Controllers
                 return Unauthorized();
             }
             
-            var userInDb = await context.Users.FirstOrDefaultAsync(u => u.Email == form.Email);
+            var userInDb = await users.GetUserByEmailAsync(form.Email);
             if (userInDb is not null)
             {
                 return BadRequest("The email has been registered by another account!");
@@ -48,8 +49,7 @@ namespace Devjobs.Controllers
                 Password = GetMD5(form.Password),
                 Role = form.IsCorporate ? "corporate" : "candidate"
             };
-            await context.Users.AddAsync(user);
-            await context.SaveChangesAsync();
+            await users.AddUserAsync(user);            
 
             // tra token ve client
             return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));
@@ -63,8 +63,9 @@ namespace Devjobs.Controllers
                 return Unauthorized();
             }
             userData.Password = GetMD5(userData.Password);
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == userData.Email && u.Password == userData.Password);
-            if (user is null)
+            var user = await users.GetUserByEmailAsync(userData.Email);
+                //FirstOrDefaultAsync(u => u.Email == userData.Email && u.Password == userData.Password);
+            if (user.Password == userData.Password)
             {
                 return Unauthorized("Email or Password is not correct!");
             }
@@ -73,11 +74,11 @@ namespace Devjobs.Controllers
             return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));            
         }
 
-        [HttpPost("me")]
-        public async Task<ActionResult<dynamic>> GetMe()
-        {
-            
-        }
+        //[HttpPost("me")]
+        //public async Task<ActionResult<dynamic>> GetMe()
+        //{
+        //    return 
+        //}
 
 
         private JwtSecurityToken CreateAccessToken(User user)

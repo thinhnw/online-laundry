@@ -45,42 +45,50 @@ namespace Devjobs.Controllers
 
         // PUT: api/Jobs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutJob(int id, JobDto jobDto)
-        {
-            var jobInDb = await repository.GetJobByIdAsync(id);
-            if (jobInDb is null)
-            {
-                return NotFound();
-            }
-            Job job = jobInDb with
-            {
-                CorporateId = jobDto.CorporateId,
-                Description = jobDto.Description,
-                Location = jobDto.Location,
-                SalaryMax = jobDto.SalaryMax,
-                SalaryMin = jobDto.SalaryMin,
-                Status = jobDto.Status,
-                Title = jobDto.Title,
-            };
-            await repository.UpdateJobAsync(job);
-            return NoContent();
-        }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutJob(int id, JobDto jobDto)
+        //{
+        //    var jobInDb = await repository.GetJobByIdAsync(id);
+        //    if (jobInDb is null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    Job job = jobInDb with
+        //    {
+        //        CorporateId = jobDto.CorporateId,
+        //        Description = jobDto.Description,
+        //        Location = jobDto.Location,
+        //        SalaryMax = jobDto.SalaryMax,
+        //        SalaryMin = jobDto.SalaryMin,
+        //        Status = jobDto.Status,
+        //        Title = jobDto.Title,
+        //    };
+        //    await repository.UpdateJobAsync(job);
+        //    return NoContent();
+        //}
 
         // POST: api/Jobs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Job>> PostJob(JobDto jobDto)
+        public async Task<ActionResult<Job>> PostJob(PostJobDto dto)
         {
             Job job = new()
             {
-                Title = jobDto.Title,
-                Description = jobDto.Description,
-                Location = jobDto.Location,
-                SalaryMin = jobDto.SalaryMin,
-                SalaryMax = jobDto.SalaryMax,
-                Status = jobDto.Status,
-                CorporateId = jobDto.CorporateId,
+
+                CorporateId = 3,
+                Title = dto.Title,
+
+                Country = dto.Country,
+                City = dto.City,
+                Type = dto.Type,
+                HiringNumber = dto.HiringNumber,
+                IsRemote = dto.IsRemote,
+
+                SalaryMin = dto.SalaryMin,
+                SalaryMax = dto.SalaryMax,
+                SalaryRate = dto.SalaryRate,
+                Status = "new",
+                Description = dto.Description,
             };
             await repository.AddJobAsync(job);
             return CreatedAtAction("GetJob", new { id = job.Id }, job);

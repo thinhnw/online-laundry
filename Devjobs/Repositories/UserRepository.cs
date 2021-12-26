@@ -32,6 +32,11 @@ namespace Devjobs.Repositories
 
         }
 
+        public async Task<User> GetUserByEmailAsync(string email)
+        {            
+            return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<User> GetUserByIdAsync(int id)
         {
             return await context.Users.FindAsync(id);

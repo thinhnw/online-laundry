@@ -11,15 +11,27 @@ namespace Devjobs.Models
     [Table("Jobs")]
     public record Job
     {
-        public int Id { get; init; }
-        public string Title { get; init; }
-        public string Description { get; init; }
-        public string Location { get; init; }
-        public int SalaryMin { get; init; }
-        public int SalaryMax { get; init; }
-        public string Status { get; init; }
+        public int Id { get; set; }
+
+        [Required]
+        public string Title { get; set; }
+        [Required]
+        public string Status { get; set; }
+        [Required]
+        public bool IsRemote { get; set; }
+        
+        public string Country { get; set; }
+        public string City { get; set; }
+        public int HiringNumber { get; set; }
+        [Required]
+        public string Type { get; set; }
+        public int SalaryMin { get; set; }
+        public int SalaryMax { get; set; }
+        public string SalaryRate { get; set; }
+        [Required]        
+        public string Description { get; set; }
         //FK
-        public int CorporateId { get; init; }
-        public virtual Corporate Corporate { get; init; }
+        public int CorporateId { get; set; }
+        public virtual Corporate Corporate { get; set; }
     }
 }

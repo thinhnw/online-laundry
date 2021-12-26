@@ -11,20 +11,27 @@ namespace Devjobs
     {
         public static CorporateDto AsDto(this Corporate corporate)
         {
-            return new CorporateDto(corporate.Id, corporate.Name, corporate.About, corporate.UserId);
+            return new CorporateDto(corporate.Id, corporate.Name, corporate.About, corporate.Logo, corporate.UserId);            
         }
         public static JobDto AsDto(this Job job)
         {
             //TODO
             return new JobDto
             {
-                CorporateId = job.CorporateId,
-                Description = job.Description,
-                Location = job.Location,
-                SalaryMax = job.SalaryMax,
-                Status = job.Status,
-                SalaryMin = job.SalaryMin,
+                Corporate = job.Corporate.AsDto(),
                 Title = job.Title,
+
+                Country = job.Country,
+                City = job.City,
+                Type = job.Type,
+                HiringNumber = job.HiringNumber,
+                IsRemote = job.IsRemote,
+
+                SalaryMin = job.SalaryMin,
+                SalaryMax = job.SalaryMax,
+                SalaryRate = job.SalaryRate,
+                Status = job.Status,
+                Description = job.Description     
             };
         }
         public static JobApplicationDto AsDto(this JobApplication jobApplication)
