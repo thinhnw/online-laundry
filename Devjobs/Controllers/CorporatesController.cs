@@ -54,7 +54,8 @@ namespace Devjobs.Controllers
             {
                 Name = dto.Name,
                 About = dto.About,
-                UserId = dto.UserId
+                UserId = dto.UserId,
+                Logo=dto.Logo,
             };
             var result = await repository.AddCorporateAsync(corporate);
             if (result is null)
@@ -78,6 +79,7 @@ namespace Devjobs.Controllers
             }
             inDb.About = dto.About;
             inDb.Name = dto.Name;
+            inDb.Logo = dto.Logo;
             await repository.SaveChangesAsync();            
 
             return NoContent();
