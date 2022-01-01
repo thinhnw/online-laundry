@@ -16,7 +16,8 @@ namespace Devjobs.Models
         public string City { get; init; }
         public string Country { get; init; }
         public string Phone { get; init; }
-        public int UserId { get; init; }
+
+        public int UserId { get; init; }        
         public virtual User User { get; init; }
 
     }

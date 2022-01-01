@@ -39,7 +39,8 @@ namespace Devjobs.Repositories
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await context.Users.FindAsync(id);
+            var user = await context.Users.Include(u => u.Candidate).Include(u => u.Corporate).FirstOrDefaultAsync(u => u.Id == id);
+            return user;
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync()

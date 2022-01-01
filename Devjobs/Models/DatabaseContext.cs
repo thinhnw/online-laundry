@@ -13,7 +13,15 @@ namespace Devjobs.Models
             : base(options)
         {
         }
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Candidate>()
+                .HasOne(c => c.User)
+                .WithOne(u => u.Candidate);
+            modelBuilder.Entity<Corporate>()
+                .HasOne(c => c.User)
+                .WithOne(u => u.Corporate);
+        }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Job> Jobs { get; set; }

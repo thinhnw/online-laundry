@@ -14,6 +14,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using Devjobs.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Devjobs.Controllers
 {
@@ -23,11 +24,15 @@ namespace Devjobs.Controllers
     {        
         public IConfiguration configuration;
         public IUsersRepository users;
+        public ICandidatesRepository candidates;
+        public ICorporatesRepository corporates;
 
-        public AuthController(IConfiguration config, IUsersRepository repo)
+        public AuthController(IConfiguration config, IUsersRepository users, ICandidatesRepository candidates, ICorporatesRepository corporates)
         {            
             this.configuration = config;
-            this.users = repo;
+            this.users = users;
+            this.candidates = candidates;
+            this.corporates = corporates;
         }
 
         [HttpPost("register")]
@@ -50,9 +55,26 @@ namespace Devjobs.Controllers
                 Role = form.IsCorporate ? "corporate" : "candidate"
             };
             await users.AddUserAsync(user);            
+            if (user.Role == "corporate")
+            {
+                await corporates.AddCorporateAsync(new Corporate
+                {
+                    UserId = user.Id
+                });                                
+            }
+            else
+            {
+                await candidates.AddCandidateAsync(new Candidate
+                {
+                    UserId = user.Id
+                });
+            }
 
             // tra token ve client
-            return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user))
+            });
         }
 
         [HttpPost("login")]
@@ -65,20 +87,46 @@ namespace Devjobs.Controllers
             userData.Password = GetMD5(userData.Password);
             var user = await users.GetUserByEmailAsync(userData.Email);
                 //FirstOrDefaultAsync(u => u.Email == userData.Email && u.Password == userData.Password);
-            if (user.Password == userData.Password)
+            if (!user.Password.Equals(userData.Password))
             {
-                return Unauthorized("Email or Password is not correct!");
+                return Unauthorized("Email or Password is not correct! " + user.Password + " " + userData.Password);
             }
             
             // tra token ve client
-            return Ok(new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user)));            
+            return Ok(new 
+            {
+                token =  new JwtSecurityTokenHandler().WriteToken(CreateAccessToken(user))
+            });            
         }
 
-        //[HttpPost("me")]
-        //public async Task<ActionResult<dynamic>> GetMe()
-        //{
-        //    return 
-        //}
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> GetMe()
+        {            
+            var userId = GetUserId();
+            User user = await users.GetUserByIdAsync(userId);
+            
+            if (user.Role == "candidate")
+            {
+                return new
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Role = user.Role,
+                    Candidate = user.Candidate.AsDto(),
+                };
+            }
+            else
+            {
+                return new
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Role = user.Role,
+                    Corporate = user.Corporate.AsDto()
+                };
+            }
+        }
 
 
         private JwtSecurityToken CreateAccessToken(User user)
