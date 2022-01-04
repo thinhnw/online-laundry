@@ -8,31 +8,34 @@ using Microsoft.EntityFrameworkCore;
 using Devjobs.Models;
 using Devjobs.Repositories;
 using Devjobs.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Devjobs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CandidatesController : ControllerBase
+    public class CandidatesController : BaseController
     {
-        private readonly ICandidatesRepository repository;
-        public CandidatesController(ICandidatesRepository repository)
+        private readonly ICandidatesRepository candidates;
+        private readonly IEducationsRepository educations;
+        public CandidatesController(ICandidatesRepository candidates, IEducationsRepository educations, IUsersRepository users) : base(users)
         {
-            this.repository = repository;
+            this.candidates = candidates;
+            this.educations = educations;
         }
 
         // GET: api/Candidates
         [HttpGet]
         public async Task<IEnumerable<CandidateDto>> GetCandidates()
         {
-            return (await repository.GetCandidatesAsync()).Select(item=>item.AsDto());
+            return (await candidates.GetCandidatesAsync()).Select(item=>item.AsDto());
         }
 
         // GET: api/Candidates/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CandidateDto>> GetCandidate(int id)
         {
-            var candidate = await repository.GetCandidateByIdAsync(id);
+            var candidate = await candidates.GetCandidateByIdAsync(id);
 
             if (candidate == null)
             {
@@ -47,7 +50,7 @@ namespace Devjobs.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCandidate(int id, CandidateDto candidateDto)
         {
-            var candidateInDb = await repository.GetCandidateByIdAsync(id);
+            var candidateInDb = await candidates.GetCandidateByIdAsync(id);
             if (candidateInDb is null)
             {
                 return NotFound();
@@ -62,7 +65,7 @@ namespace Devjobs.Controllers
                 LastName = candidateDto.LastName,
                 Phone = candidateDto.Phone,
             };
-            await repository.UpdateCandidateAsync(candidate);
+            await candidates.UpdateCandidateAsync(candidate);
             return NoContent();
         }
 
@@ -81,22 +84,55 @@ namespace Devjobs.Controllers
                 LastName = candidateDto.LastName,
                 Phone = candidateDto.Phone,
             };
-            await repository.AddCandidateAsync(candidate);
+            await candidates.AddCandidateAsync(candidate);
 
             return CreatedAtAction("GetCandidate", new { id = candidate.Id }, candidate);
+        }
+
+        [HttpPost("personal-details")]
+        [Authorize]
+        public async Task<ActionResult<CandidateDto>> UpdatePersonalProfile(CandidatePersonalDetailsDto dto)
+        {
+
+            User user = await GetCurrentUser();
+            Candidate candidate = user.Candidate;
+
+            candidate.FirstName = dto.FirstName;
+            candidate.LastName = dto.LastName;
+            candidate.Country = dto.Country;
+            candidate.City = dto.City;
+            candidate.Address = dto.Address;
+            candidate.Phone = dto.Phone;
+
+            await candidates.SaveChangesAsync();
+            return NoContent();
+        }
+
+
+        [HttpPost("educations")]
+        [Authorize]
+        public async Task<ActionResult<CandidateDto>> UpdateEducations(List<UpdateEducationDto> updateEduList)
+        {
+
+            User user = await GetCurrentUser();
+            Candidate candidate = user.Candidate;
+            
+
+            await candidates.SaveChangesAsync();
+            return candidate.AsDto();
         }
 
         // DELETE: api/Candidates/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCandidate(int id)
         {
-            var candidate = await repository.GetCandidateByIdAsync(id);
+            var candidate = await candidates.GetCandidateByIdAsync(id);
             if (candidate == null)
             {
                 return NotFound();
             }
 
-            await repository.DeleteCandidateAsync(id);
+            await candidates.DeleteCandidateAsync(id);
             return NoContent();
         }
 

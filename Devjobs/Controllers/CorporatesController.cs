@@ -8,18 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using Devjobs.Models;
 using Devjobs.Repositories;
 using Devjobs.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Devjobs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CorporatesController : ControllerBase
+    public class CorporatesController : BaseController
     {
-        private readonly ICorporatesRepository repository;
+        private readonly ICorporatesRepository corporates;
 
-        public CorporatesController(ICorporatesRepository repository)
+        public CorporatesController(ICorporatesRepository corporates, IUsersRepository users) : base(users)
         {            
-            this.repository = repository;
+            this.corporates = corporates;
         }
 
 
@@ -27,14 +28,14 @@ namespace Devjobs.Controllers
         [HttpGet]
         public async Task<IEnumerable<CorporateDto>> GetCorporates()
         {
-            return (await repository.GetCorporatesAsync()).Select(corporate => corporate.AsDto());
+            return (await corporates.GetCorporatesAsync()).Select(corporate => corporate.AsDto());
         }
 
         // GET: api/Corporates/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CorporateDto>> GetCorporateAsync(int id)
         {
-            var corporate = await repository.GetCorporateByIdAsync(id);
+            var corporate = await corporates.GetCorporateByIdAsync(id);
 
             if (corporate is null)
             {
@@ -57,7 +58,7 @@ namespace Devjobs.Controllers
                 UserId = dto.UserId,
                 Logo=dto.Logo,
             };
-            var result = await repository.AddCorporateAsync(corporate);
+            var result = await corporates.AddCorporateAsync(corporate);
             if (result is null)
             {
                 return NotFound("User not found");
@@ -67,20 +68,29 @@ namespace Devjobs.Controllers
         }
 
 
-        // PUT: api/Corporates/5
+        // Patch: api/Corporates/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCorporate(int id, UpdateCorporateDto dto)
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateCorporate(int id, UpdateCorporateDto dto)
         {
-            var inDb = await repository.GetCorporateByIdAsync(id);
-            if (inDb is null)
+            var corp = await corporates.GetCorporateByIdAsync(id);
+            if (corp is null)
             {
                 return NotFound();
             }
-            inDb.About = dto.About;
-            inDb.Name = dto.Name;
-            inDb.Logo = dto.Logo;
-            await repository.SaveChangesAsync();            
+            User user = await GetCurrentUser();
+            if (!user.Corporate.Equals(corp))
+            {
+                return Forbid();
+            }
+
+            corp.Name = dto.Name;
+            corp.Country = dto.Country;
+            corp.About = dto.About;
+            //corp.Logo = dto.Logo;
+            corp.Phone = dto.Phone;
+            await corporates.SaveChangesAsync();            
 
             return NoContent();
         }
@@ -90,7 +100,7 @@ namespace Devjobs.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCorporate(int id)
         {            
-            await repository.DeleteCorporateAsync(id);         
+            await corporates.DeleteCorporateAsync(id);         
 
             return NoContent();
         }   

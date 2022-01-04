@@ -11,7 +11,7 @@ namespace Devjobs
     {
         public static CorporateDto AsDto(this Corporate corporate)
         {
-            return new CorporateDto(corporate.Id, corporate.Name, corporate.About, corporate.Logo, corporate.UserId);
+            return new CorporateDto(corporate.Id, corporate.Name, corporate.About, corporate.Logo, corporate.UserId, corporate.Country, corporate.Phone);
         }
         public static JobDto AsDto(this Job job)
         {

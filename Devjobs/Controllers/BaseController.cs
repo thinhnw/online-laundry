@@ -12,11 +12,17 @@ namespace Devjobs.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        [Authorize]
-        protected int GetUserId()
+        protected IUsersRepository users;
+        public BaseController(IUsersRepository usersRepo)
         {
-            var test = User.Claims.First(c => c.Type == "Id").Value;
-            return int.Parse(this.User.Claims.First(c => c.Type == "Id").Value);
+            this.users = usersRepo;
+        }
+        [Authorize]
+        protected async Task<User> GetCurrentUser()
+        {
+            var id = int.Parse(User.Claims.First(c => c.Type == "Id").Value);
+            var user = await users.GetUserByIdAsync(id);
+            return user;
         }
     }
 }

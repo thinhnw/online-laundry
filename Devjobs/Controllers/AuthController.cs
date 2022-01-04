@@ -22,15 +22,13 @@ namespace Devjobs.Controllers
     [ApiController]
     public class AuthController : BaseController
     {        
-        public IConfiguration configuration;
-        public IUsersRepository users;
+        public IConfiguration configuration;        
         public ICandidatesRepository candidates;
         public ICorporatesRepository corporates;
 
-        public AuthController(IConfiguration config, IUsersRepository users, ICandidatesRepository candidates, ICorporatesRepository corporates)
-        {            
-            this.configuration = config;
-            this.users = users;
+        public AuthController(IConfiguration config, ICandidatesRepository candidates, ICorporatesRepository corporates, IUsersRepository users) : base(users)
+        {                 
+            this.configuration = config;            
             this.candidates = candidates;
             this.corporates = corporates;
         }
@@ -87,7 +85,7 @@ namespace Devjobs.Controllers
             userData.Password = GetMD5(userData.Password);
             var user = await users.GetUserByEmailAsync(userData.Email);
                 //FirstOrDefaultAsync(u => u.Email == userData.Email && u.Password == userData.Password);
-            if (!user.Password.Equals(userData.Password))
+            if (user is null  || user.Password != userData.Password)
             {
                 return Unauthorized("Email or Password is not correct! " + user.Password + " " + userData.Password);
             }
@@ -102,9 +100,8 @@ namespace Devjobs.Controllers
         [HttpGet("me")]
         [Authorize]
         public async Task<ActionResult<dynamic>> GetMe()
-        {            
-            var userId = GetUserId();
-            User user = await users.GetUserByIdAsync(userId);
+        {
+            User user = await GetCurrentUser();
             
             if (user.Role == "candidate")
             {
