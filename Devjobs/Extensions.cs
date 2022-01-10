@@ -55,12 +55,16 @@ namespace Devjobs
                 FirstName=candidate.FirstName,
                 LastName=candidate.LastName,
                 Phone=candidate.Phone,
+                Educations=candidate.Educations.Select(e => e.AsDto()).ToList(),
+                WorkExperiences = candidate.WorkExperiences.Select(e => e.AsDto()).ToList(),
+                Skills = candidate.Skills.Select(s => s.AsDto()).ToList(),
             };
         }
         public static EducationDto AsDto(this Education education)
         {
             return new EducationDto
             {
+                Id = education.Id,
                 CandidateId = education.CandidateId,
                 City = education.City,
                 Country = education.Country,
@@ -75,6 +79,7 @@ namespace Devjobs
         {
             return new WorkExperienceDto
             {
+                Id = workExperience.Id,
                 CandidateId = workExperience.CandidateId,
                 City = workExperience.City,
                 Country = workExperience.Country,
@@ -83,6 +88,15 @@ namespace Devjobs
                 JobTitle = workExperience.JobTitle,
                 Organization = workExperience.Organization,
                 ToTime = workExperience.ToTime
+            };
+        }
+        public static SkillDto AsDto(this Skill skill)
+        {
+            return new SkillDto
+            {
+                Id = skill.Id,
+                CandidateId = skill.CandidateId,
+                Name = skill.Name            
             };
         }
 

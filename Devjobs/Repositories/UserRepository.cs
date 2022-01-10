@@ -39,7 +39,15 @@ namespace Devjobs.Repositories
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            var user = await context.Users.Include(u => u.Candidate).Include(u => u.Corporate).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await context.Users
+                .Include(u => u.Candidate)
+                    .ThenInclude(c => c.Educations)
+                .Include(u => u.Candidate)                    
+                    .ThenInclude(c => c.WorkExperiences)
+                .Include(u => u.Candidate)
+                    .ThenInclude(c => c.Skills)
+                .Include(u => u.Corporate)
+                .FirstOrDefaultAsync(u => u.Id == id);
             return user;
         }
 

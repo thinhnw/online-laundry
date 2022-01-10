@@ -7,17 +7,17 @@ namespace Devjobs.Models
 {
     public record Education
     {
-        public int Id { get; init; }
-        public string Degree { get; init; }
-        public string FieldOfStudy { get; init; }
-        public string School { get; init; }
-        public string City { get; init; }
-        public string Country { get; init; }
-        public DateTime FromTime { get; init; }
-        public DateTime ToTime { get; init; }
+        public int Id { get; set; }
+        public string Degree { get; set; }
+        public string FieldOfStudy { get; set; }
+        public string School { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public DateTime? FromTime { get; set; }
+        public DateTime? ToTime { get; set; }
 
         //FK
-        public int CandidateId { get; init; }
-        public virtual Candidate Candidate { get; init; }
+        public int CandidateId { get; set; }
+        public virtual Candidate Candidate { get; set; }
     }
 }

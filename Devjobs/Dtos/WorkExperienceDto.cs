@@ -7,15 +7,29 @@ namespace Devjobs.Dtos
 {
     public class WorkExperienceDto
     {
-        public string JobTitle { get; init; }
-        public string Organization { get; init; }
-        public string City { get; init; }
-        public string Country { get; init; }
-        public DateTime FromTime { get; init; }
-        public DateTime ToTime { get; init; }
-        public string Description { get; init; }
+        public int Id { get; set; }
+        public string JobTitle { get; set; }
+        public string Organization { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public DateTime? FromTime { get; set; }
+        public DateTime? ToTime { get; set; }
+        public string Description { get; set; }
 
         //FK
-        public int CandidateId { get; init; }
+        public int CandidateId { get; set; }
+    }
+
+    public class UpdateWorkExperienceDto
+    {
+        public int? Id { get; set; }
+        public string JobTitle { get; set; }        
+        public string Organization { get; set; }
+        public string Description { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public DateTime? FromTime { get; set; }
+        public DateTime? ToTime { get; set; }
+
     }
 }

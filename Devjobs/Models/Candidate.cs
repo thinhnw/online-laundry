@@ -20,5 +20,9 @@ namespace Devjobs.Models
         public int UserId { get; set; }        
         public virtual User User { get; set; }
 
+        public ICollection<Education> Educations { get; set; }
+        public ICollection<WorkExperience> WorkExperiences { get; set; }
+        public ICollection<Skill> Skills { get; set; }
+
     }
 }

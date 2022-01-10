@@ -42,6 +42,7 @@ namespace Devjobs
             services.AddScoped<IJobsRepository, JobsRepository>();
             services.AddScoped<IEducationsRepository, EducationsRepository>();
             services.AddScoped<IWorkExperiencesRepository, WorkExperiencesRepository>();
+            services.AddScoped<ISkillsRepository, SkillsRepository>();
 
             services.AddDbContextPool<Models.DatabaseContext>(options =>
             {

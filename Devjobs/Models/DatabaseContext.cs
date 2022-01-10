@@ -21,6 +21,15 @@ namespace Devjobs.Models
             modelBuilder.Entity<Corporate>()
                 .HasOne(c => c.User)
                 .WithOne(u => u.Corporate);
+            modelBuilder.Entity<Candidate>()
+                .HasMany(c => c.Educations)
+                .WithOne(e => e.Candidate);
+            modelBuilder.Entity<Candidate>()
+                .HasMany(c => c.WorkExperiences)
+                .WithOne(e => e.Candidate);
+            modelBuilder.Entity<Candidate>()
+                .HasMany(c => c.Skills)
+                .WithOne(s => s.Candidate);
         }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<User> Users { get; set; }
@@ -30,6 +39,6 @@ namespace Devjobs.Models
         public virtual DbSet<Corporate> Corporates { get; set; }
         public virtual DbSet<Education> Educations { get; set; }
         public virtual DbSet<WorkExperience> WorkExperiences { get; set; }
-        
+        public virtual DbSet<Skill> Skills { get; set; }
     }
 }

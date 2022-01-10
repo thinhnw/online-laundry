@@ -18,10 +18,14 @@ namespace Devjobs.Controllers
     {
         private readonly ICandidatesRepository candidates;
         private readonly IEducationsRepository educations;
-        public CandidatesController(ICandidatesRepository candidates, IEducationsRepository educations, IUsersRepository users) : base(users)
+        private readonly IWorkExperiencesRepository works;
+        private readonly ISkillsRepository skills;
+        public CandidatesController(ICandidatesRepository candidates, IEducationsRepository educations, IWorkExperiencesRepository works, ISkillsRepository skills, IUsersRepository users) : base(users)
         {
             this.candidates = candidates;
             this.educations = educations;
+            this.works = works;
+            this.skills = skills;
         }
 
         // GET: api/Candidates
@@ -116,7 +120,125 @@ namespace Devjobs.Controllers
 
             User user = await GetCurrentUser();
             Candidate candidate = user.Candidate;
+
+            foreach (var edu in updateEduList)            
+            {                
+                
+                if (edu.Id > 0)
+                {
+                    Education education = await educations.GetEducationByIdAsync((int) edu.Id);
+                    if (education.CandidateId != candidate.Id)
+                    {
+                        continue;
+                    }
+                    education.Degree = edu.Degree;
+                    education.FieldOfStudy = edu.FieldOfStudy;
+                    education.School = edu.School;
+                    education.City = edu.City;
+                    education.Country = edu.Country;
+                    education.FromTime = edu.FromTime;
+                    education.ToTime = edu.ToTime;
+                    education.CandidateId = candidate.Id;                    
+                    await educations.UpdateEducationAsync(education);
+                }
+                else
+                {
+                    Education education = new Education
+                    {
+                        Degree = edu.Degree,
+                        FieldOfStudy = edu.FieldOfStudy,
+                        School = edu.School,
+                        City = edu.City,
+                        Country = edu.Country,
+                        FromTime = edu.FromTime,
+                        ToTime = edu.ToTime,
+                        CandidateId = candidate.Id
+                    };
+                    await educations.AddEducationAsync(education);
+                }
+            }
             
+
+            await candidates.SaveChangesAsync();
+            return candidate.AsDto();
+        }
+        [HttpPost("work-experiences")]
+        [Authorize]
+        public async Task<ActionResult<CandidateDto>> UpdateWorkExperiences(List<UpdateWorkExperienceDto> updateWorkExperienceList)
+        {
+
+            User user = await GetCurrentUser();
+            Candidate candidate = user.Candidate;
+
+            foreach (var we in updateWorkExperienceList)
+            {                
+                if (we.Id > 0)
+                {
+                    WorkExperience work = await works.GetWorkExperienceByIdAsync((int)we.Id);
+                    if (work.CandidateId != candidate.Id)
+                    {
+                        continue;
+                    }
+                    work.JobTitle = we.JobTitle;
+                    work.Organization = we.Organization;
+                    work.City = we.City;
+                    work.Country = we.Country;
+                    work.FromTime = we.FromTime;
+                    work.ToTime = we.ToTime;
+                    work.Description = we.Description;
+                    work.CandidateId = candidate.Id;                    
+                    await works.UpdateWorkExperienceAsync(work);
+                } 
+                else
+                {
+                    WorkExperience work = new WorkExperience
+                    {
+                        JobTitle = we.JobTitle,
+                        Organization = we.Organization,
+                        City = we.City,
+                        Country = we.Country,
+                        FromTime = we.FromTime,
+                        ToTime = we.ToTime,
+                        Description = we.Description,
+                        CandidateId = candidate.Id
+                    };
+                    await works.AddWorkExperienceAsync(work);
+                }
+            }
+
+            await candidates.SaveChangesAsync();
+            return candidate.AsDto();
+        }
+        [HttpPost("skills")]
+        [Authorize]
+        public async Task<ActionResult<CandidateDto>> UpdateSkills(List<UpdateSkillDto> updateSkillList)
+        {
+
+            User user = await GetCurrentUser();
+            Candidate candidate = user.Candidate;
+
+            foreach (var sk in updateSkillList)
+            {
+                if (sk.Id > 0)
+                {
+                    Skill skill = await skills.GetSkillByIdAsync((int) sk.Id);
+                    if (skill.CandidateId != candidate.Id)
+                    {
+                        continue;
+                    }
+                    skill.Name = sk.Name;                                       
+                    await skills.UpdateSkillAsync(skill);
+                }
+                else
+                {
+                    Skill skill = new Skill
+                    {                        
+                        Name = sk.Name,
+                        CandidateId = candidate.Id
+                    };
+                    await skills.AddSkillAsync(skill);
+                }
+            }
 
             await candidates.SaveChangesAsync();
             return candidate.AsDto();

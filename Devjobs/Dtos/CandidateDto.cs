@@ -9,28 +9,33 @@ namespace Devjobs.Dtos
 {
     public record CandidateDto
     {
-        public string FirstName { get; init; }
-        public string LastName { get; init; }
-        public string Address { get; init; }
-        public string City { get; init; }
-        public string Country { get; init; }
-        public string Phone { get; init; }
-        public int UserId { get; init; }
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public string Phone { get; set; }
+        public int UserId { get; set; }
+        
+        public ICollection<EducationDto> Educations { get; set; }
+        public ICollection<WorkExperienceDto> WorkExperiences { get; set; }
+        public ICollection<SkillDto> Skills { get; set; }
     }
 
     public class CandidatePersonalDetailsDto
     {
         [Required]
-        public string FirstName { get; init; }
+        public string FirstName { get; set; }
         [Required]
-        public string LastName { get; init; }
+        public string LastName { get; set; }
         
         [Required]
-        public string City { get; init; }
+        public string City { get; set; }
         [Required]
-        public string Country { get; init; }
+        public string Country { get; set; }
         
-        public string Address { get; init; }
-        public string Phone { get; init; }      
+        public string Address { get; set; }
+        public string Phone { get; set; }      
     }
 }
