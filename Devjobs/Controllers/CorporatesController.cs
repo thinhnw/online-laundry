@@ -9,6 +9,8 @@ using Devjobs.Models;
 using Devjobs.Repositories;
 using Devjobs.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace Devjobs.Controllers
 {
@@ -17,10 +19,12 @@ namespace Devjobs.Controllers
     public class CorporatesController : BaseController
     {
         private readonly ICorporatesRepository corporates;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public CorporatesController(ICorporatesRepository corporates, IUsersRepository users) : base(users)
+        public CorporatesController(ICorporatesRepository corporates, IUsersRepository users,IWebHostEnvironment hostEnvironment) : base(users)
         {            
             this.corporates = corporates;
+            this._hostEnvironment = hostEnvironment;
         }
 
 
@@ -48,15 +52,14 @@ namespace Devjobs.Controllers
         // POST: api/Corporates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Corporate>> PostCorporate(CreateCorporateDto dto)
+        public async Task<ActionResult<Corporate>> PostCorporate([FromForm]CreateCorporateDto dto)
         {
-
             Corporate corporate = new()
             {
                 Name = dto.Name,
                 About = dto.About,
                 UserId = dto.UserId,
-                Logo=dto.Logo,
+                Logo= await SaveImage(dto.imageFile),
             };
             var result = await corporates.AddCorporateAsync(corporate);
             if (result is null)
@@ -66,7 +69,18 @@ namespace Devjobs.Controllers
             
             return CreatedAtAction("GetCorporateAsync", new { id = corporate.Id }, corporate);
         }
-
+        [NonAction]
+        public async Task<string> SaveImage(IFormFile imageFile)
+        {
+            string imageName = new String(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(' ', '-');
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", imageName);
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+            return imageName;
+        }
 
         // Patch: api/Corporates/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
