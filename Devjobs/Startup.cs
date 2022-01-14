@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Data.SqlClient;
+using System.Text.Json.Serialization;
 
 namespace Devjobs
 {
@@ -34,7 +35,8 @@ namespace Devjobs
         public void ConfigureServices(IServiceCollection services)
         {            
             var connectionString = Configuration.GetConnectionString("DevjobsDB");
-
+            services.AddControllers().AddJsonOptions(x =>
+            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<ICandidatesRepository, CandidatesRepository>();
             services.AddScoped<ICorporatesRepository, CorporatesRepository>();
