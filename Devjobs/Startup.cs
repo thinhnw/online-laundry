@@ -96,6 +96,9 @@ namespace Devjobs
 
             app.UseCors(MyAllowOrigins);
 
+            app.UseStaticFiles();
+
+
             app.UseAuthentication();
             app.UseAuthorization();
             

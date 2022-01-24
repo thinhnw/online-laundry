@@ -73,8 +73,9 @@ namespace Devjobs.Controllers
         public async Task<string> SaveImage(IFormFile imageFile)
         {
             string imageName = new String(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(' ', '-');
-            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
-            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", imageName);
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);            
+            var imagePath = Path.Combine(_hostEnvironment.WebRootPath, "images", imageName);
+            var path = imagePath.ToString();
             using (var fileStream = new FileStream(imagePath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(fileStream);
@@ -86,7 +87,7 @@ namespace Devjobs.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPatch("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateCorporate(int id, UpdateCorporateDto dto)
+        public async Task<IActionResult> UpdateCorporate(int id,[FromForm] UpdateCorporateDto dto)
         {
             var corp = await corporates.GetCorporateByIdAsync(id);
             if (corp is null)
@@ -102,7 +103,7 @@ namespace Devjobs.Controllers
             corp.Name = dto.Name;
             corp.Country = dto.Country;
             corp.About = dto.About;
-            //corp.Logo = dto.Logo;
+            corp.Logo = await SaveImage(dto.Logo);
             corp.Phone = dto.Phone;
             await corporates.SaveChangesAsync();            
 
