@@ -5,7 +5,7 @@ services:
     image: devjobs
     container_name: devjobs
     build:
-      context: ./Devjobs/
+      context: ./OnlineLaundry/
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
